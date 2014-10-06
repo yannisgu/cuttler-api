@@ -1,9 +1,11 @@
-﻿using Cuttler.Entities;
+﻿using System.Threading.Tasks;
+using Cuttler.Entities;
 
 namespace Cuttler.DataAccess
 {
     public interface IUserService
     {
-        User Login(string username, string password);
+        Task<User> Login(string username, string password);
+        Task<User> GetUser(string userName);
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Nancy;
+using Nancy.Responses.Negotiation;
 
 namespace Cuttler.Api.Modules
 {
@@ -16,13 +19,25 @@ namespace Cuttler.Api.Modules
             : base("/users")
         {
             this.userService = userService;
-            Post["/login"] = Login;
+            Post["/login", true] = Login;
+            Get["/current"] = ctx =>
+            {
+                var user = Context.CurrentUser as NancyUser;
+                if (user != null)
+                {
+                    return user.User;
+                }
+                else
+                {
+                    throw new Exception("User should be logged.");
+                }
+            };
         }
 
-        private dynamic Login(dynamic paramters)
+        private async Task<dynamic> Login(dynamic paramters, CancellationToken cancel)
         {
             User user;
-            object returnObject = user= userService.Login(Context.Request.Form.username.Value, Context.Request.Form.password.Value);
+            object returnObject = user= await userService.Login(Context.Request.Form["username"], Context.Request.Form["password"]);
             var statusCode = HttpStatusCode.OK;
             if (returnObject == null)
             {
@@ -31,7 +46,8 @@ namespace Cuttler.Api.Modules
             }
             else
             {
-                //this.Context.CurrentUser = user
+                Context.Request.Session["user"] = user.UserName;
+                this.Context.CurrentUser = new NancyUser(user);
             }
 
 
