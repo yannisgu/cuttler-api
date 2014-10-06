@@ -7,7 +7,9 @@ using System.Web;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Nancy;
+using Nancy.ModelBinding;
 using Nancy.Responses.Negotiation;
+using Nancy.Security;
 
 namespace Cuttler.Api.Modules
 {
@@ -20,6 +22,7 @@ namespace Cuttler.Api.Modules
         {
             this.userService = userService;
             Post["/login", true] = Login;
+            Post["/register", true] = Register;
             Get["/current"] = ctx =>
             {
                 var user = Context.CurrentUser as NancyUser;
@@ -29,11 +32,21 @@ namespace Cuttler.Api.Modules
                 }
                 else
                 {
-                    throw new Exception("User should be logged.");
+                    return Negotiate.WithModel(new Error("Not logged in.")).
+                        WithStatusCode(HttpStatusCode.Forbidden);
                 }
             };
+
         }
 
+        private async Task<object> Register(dynamic parameters, CancellationToken cancel)
+        {
+            var newUser = this.Bind<User>();
+            await userService.AddUser(newUser);
+            await userService.AddLogin(newUser, Request.Form["password"], enabled: false);
+            return newUser;
+        }
+    
         private async Task<dynamic> Login(dynamic paramters, CancellationToken cancel)
         {
             User user;
@@ -42,12 +55,12 @@ namespace Cuttler.Api.Modules
             if (returnObject == null)
             {
                 statusCode = HttpStatusCode.Forbidden;
-                returnObject = new Error() {Message = "The provided username or password is wrong"};
+                returnObject = new Error("The provided username or password is wrong");
             }
             else
             {
                 Context.Request.Session["user"] = user.UserName;
-                this.Context.CurrentUser = new NancyUser(user);
+                Context.CurrentUser = new NancyUser(user);
             }
 
 
@@ -58,6 +71,11 @@ namespace Cuttler.Api.Modules
 
     internal class Error
     {
+        public Error(string message)
+        {
+            Message = message;
+        }
+
         public string Message { get; set; }
     }
 }

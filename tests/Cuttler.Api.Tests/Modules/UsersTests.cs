@@ -33,13 +33,7 @@ namespace Cuttler.Api.Tests.Modules
             var browser = new Browser(boot);
 
             // When
-            var result = browser.Post("/users/login", with =>
-            {
-                with.HttpRequest();
-                with.Accept(new MediaRange("application/json"));
-                with.FormValue("username", "user");
-                with.FormValue("password", "pass");
-            });
+            var result = Login(browser);
 
             // Then
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
@@ -58,16 +52,60 @@ namespace Cuttler.Api.Tests.Modules
             var browser = new Browser(bootstraper);
 
             // When
-            var result = browser.Post("/users/login", with =>
-            {
-                with.HttpRequest();
-                with.Accept(new MediaRange("application/json"));
-                with.FormValue("username", "wrong");
-                with.FormValue("password", "wrong");
-            });
+            var result = Login(browser, "wrong", "wrong");
 
             // Then
             Assert.AreEqual(HttpStatusCode.Forbidden, result.StatusCode);
+        }
+
+        [Test]
+        public void Should_add_user_login_when_register()
+        {
+            var mock = GetUserServiceLoginMock();
+            mock.Setup(svc => svc.AddUser(It.IsAny<User>())).Returns(Task.Run(() => { }));
+            var bootstraper = new TestBootstrapper(cfg =>
+            {
+                cfg.Module<UsersModule>();
+                cfg.Dependency(mock.Object);
+            });
+            var browser = new Browser(bootstraper);
+
+            //when 
+            var newUser = new User()
+            {
+                UserName = "yannisgu",
+                Email = "yannis@yannis.org",
+                Country = "Switzerland",
+                Location = "Courtaman",
+                Password = "Pass@word1",
+                Street = "Schulweg 28",
+                Zip = "1791"
+            };
+            var result = browser.Post("/users/register", with =>
+            {
+                with.HttpRequest();
+                with.Accept(new MediaRange("application/json"));
+                with.JsonBody(newUser);
+            });
+
+            //Should
+            mock.Verify(svc => svc.AddUser(It.Is<User>(_ =>
+                _.UserName == newUser.UserName &&
+                _.Email == newUser.Email &&
+                _.Country == newUser.Country &&
+                _.Location == newUser.Location &&
+                _.Street == newUser.Street &&
+                _.Zip == newUser.Zip
+                )));
+
+            var user = result.Get<User>();
+            Assert.AreEqual(user.UserName, newUser.UserName);
+            Assert.AreEqual(user.Email, newUser.Email);
+            Assert.AreEqual(user.Country, newUser.Country);
+            Assert.AreEqual(user.Location, newUser.Location);
+            Assert.AreEqual(user.Street, newUser.Street);
+            Assert.AreEqual(user.Zip, newUser.Zip);
+
         }
 
         [Test]
@@ -95,14 +133,14 @@ namespace Cuttler.Api.Tests.Modules
             Assert.AreEqual(user.UserName, "user");
         }
 
-        private BrowserResponse Login(Browser browser)
+        private BrowserResponse Login(Browser browser, string userName = "user", string password = "pass")
         {
             return browser.Post("/users/login", with =>
             {
                 with.HttpRequest();
                 with.Accept(new MediaRange("application/json"));
-                with.FormValue("username", "user");
-                with.FormValue("password", "pass");
+                with.FormValue("username", userName);
+                with.FormValue("password", password);
             });
         }
 

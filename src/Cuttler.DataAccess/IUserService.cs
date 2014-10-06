@@ -7,5 +7,7 @@ namespace Cuttler.DataAccess
     {
         Task<User> Login(string username, string password);
         Task<User> GetUser(string userName);
+        Task AddUser(User user);
+        Task AddLogin(User user, string password, bool enabled = true);
     }
 }

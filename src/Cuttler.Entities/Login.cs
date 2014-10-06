@@ -6,6 +6,7 @@ namespace Cuttler.Entities
     {
         public Guid Id { get; set; }
         public string PasswordHash { get; set; }
+        public bool Enabled { get;set; }
         public User User { get; set; }
         public Guid UserId { get; set; }
     }
