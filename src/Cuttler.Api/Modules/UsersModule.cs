@@ -36,15 +36,33 @@ namespace Cuttler.Api.Modules
                         WithStatusCode(HttpStatusCode.Forbidden);
                 }
             };
+            Post["/current", true] = Update;
 
         }
 
         private async Task<object> Register(dynamic parameters, CancellationToken cancel)
         {
-            var newUser = this.Bind<User>();
+            var newUser = this.Bind<UserViewModel>();
             await userService.AddUser(newUser);
-            await userService.AddLogin(newUser, Request.Form["password"], enabled: false);
+            await userService.AddLogin(newUser, newUser.Password, enabled: false);
             return newUser;
+        }
+
+        private async Task<object> Update(dynamic paramters, CancellationToken canel)
+        {
+            var newUser = this.Bind<UserViewModel>();
+            var user = Context.CurrentUser as NancyUser;
+            if (user != null)
+            {
+                newUser.Id = user.User.Id;
+                await userService.UpdateUser(newUser);
+                return newUser;
+            }
+            else
+            {
+                return Negotiate.WithModel(new Error("Not logged in.")).
+                        WithStatusCode(HttpStatusCode.Forbidden);
+            }
         }
     
         private async Task<dynamic> Login(dynamic paramters, CancellationToken cancel)

@@ -20,6 +20,8 @@ namespace Cuttler.Api.Tests.Modules
     [TestFixture]
     class UsersTests
     {
+        private static Guid testUserGuid = new Guid("{DD0BAA48-9D5F-4167-8672-632D4EE1D27F}");
+
         [Test]
         public void Should_return_the_user_when_login_with_credentials()
         {
@@ -71,7 +73,7 @@ namespace Cuttler.Api.Tests.Modules
             var browser = new Browser(bootstraper);
 
             //when 
-            var newUser = new User()
+            var newUser = new UserViewModel()
             {
                 UserName = "yannisgu",
                 Email = "yannis@yannis.org",
@@ -98,6 +100,9 @@ namespace Cuttler.Api.Tests.Modules
                 _.Zip == newUser.Zip
                 )));
 
+            mock.Verify(svc => svc.AddLogin(It.Is<User>(_ => 
+                _.UserName == newUser.UserName), newUser.Password, false));
+
             var user = result.Get<User>();
             Assert.AreEqual(user.UserName, newUser.UserName);
             Assert.AreEqual(user.Email, newUser.Email);
@@ -105,6 +110,55 @@ namespace Cuttler.Api.Tests.Modules
             Assert.AreEqual(user.Location, newUser.Location);
             Assert.AreEqual(user.Street, newUser.Street);
             Assert.AreEqual(user.Zip, newUser.Zip);
+
+        }
+
+        [Test]
+        public void Should_update_user_when_post_user()
+        {
+            var mock = GetUserServiceLoginMock();
+
+            var bootstraper = new TestBootstrapper(cfg =>
+            {
+                cfg.Module<UsersModule>();
+                cfg.Dependency(mock.Object);
+            });
+            var browser = new Browser(bootstraper);
+
+            Login(browser);
+
+            var newUser = new User() {UserName = "newUser"};
+
+            browser.Post("/users/current", with =>
+            {
+                with.HttpRequest();
+                with.Accept(new MediaRange("application/json"));
+                with.JsonBody(newUser);
+            });
+
+            //Should
+            mock.Verify(svc => svc.UpdateUser(It.Is<User>(_ => _.UserName == "newUser" && _.Id==new Guid("{DD0BAA48-9D5F-4167-8672-632D4EE1D27F}"))));
+        }
+
+        [Test]
+        public void Should_block_when_anonymous_update_user()
+        {
+            var mock = GetUserServiceLoginMock();
+
+            var bootstraper = new TestBootstrapper(cfg =>
+            {
+                cfg.Module<UsersModule>();
+                cfg.Dependency(mock.Object);
+            });
+            var browser = new Browser(bootstraper);
+           var result =  browser.Post("/users/current", with =>
+            {
+                with.HttpRequest();
+                with.Accept(new MediaRange("application/json"));
+                with.JsonBody(new User() {UserName = "dummy"});
+            });
+
+            Assert.AreEqual(result.StatusCode, HttpStatusCode.Forbidden);
 
         }
 
@@ -146,7 +200,7 @@ namespace Cuttler.Api.Tests.Modules
 
         private static Mock<IUserService> GetUserServiceLoginMock()
         {
-            var testUser = new User() {UserName = "user"};
+            var testUser = new User() { UserName = "user", Id = testUserGuid };
 
             var mock = new Mock<IUserService>();
             mock.Setup(svc => svc.Login(It.IsAny<string>(), It.IsAny<string>())).

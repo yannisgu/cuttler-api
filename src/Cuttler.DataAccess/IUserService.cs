@@ -9,5 +9,6 @@ namespace Cuttler.DataAccess
         Task<User> GetUser(string userName);
         Task AddUser(User user);
         Task AddLogin(User user, string password, bool enabled = true);
+        Task UpdateUser(User newUser);
     }
 }
