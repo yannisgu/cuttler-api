@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Web;
+using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Nancy;
 using Nancy.ModelBinding;
@@ -60,39 +59,22 @@ namespace Cuttler.Api.Modules
                 
             };
 
-            Get["/{id}/backups/{backupId}"] = (_) =>
+            Get["/{id}/backups/{backupId}", true] = async (_, cancel) =>
             {
+                var tenantId = new Guid(_.id);
+                var backupId = new Guid(_.backupId);
+                if (!await TenantService.IsAdmin(tenantId, User.Id) || await TenantService.MatchTenantBackup(tenantId, backupId))
+                {
+                    return AccesDenied();
+                }
+
                 return new Nancy.Responses.StreamResponse(() =>
                 {
-                    var back=  TenantService.GetBackupStream(new Guid(_.backupId));
+                    var back = TenantService.GetBackupStream(backupId);
                     back.Wait();
                     return back.Result;
                 }, "application/zip");
             };
         }
-    }
-
-    public class Tenant
-    {
-        public virtual Guid Id { get; set; }
-    }
-
-    public interface ITenantService
-
-    {
-    }
-
-    public interface ITenantService<T> : ITenantService where T : Tenant
-    {
-        Task Add(T viewModel);
-        Task Update(Guid id);
-        Task<bool> IsAdmin(Guid tenant, Guid user);
-        Task Delete(Guid guid);
-        Task<Stream> GetBackupStream(Guid backupId);
-        Task<Backup> GetBackups(Guid guid);
-    }
-
-    public class Backup
-    {
     }
 }

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="IDataContext.cs" />
     <Compile Include="Implementation\DataContext.cs" />
+    <Compile Include="ITenantService.cs" />
     <Compile Include="IUserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
