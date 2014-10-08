@@ -13,7 +13,7 @@ using Nancy.Security;
 
 namespace Cuttler.Api.Modules
 {
-    public class UsersModule : NancyModule
+    public class UsersModule : BaseModule
     {
         private readonly IUserService userService;
 
@@ -32,8 +32,7 @@ namespace Cuttler.Api.Modules
                 }
                 else
                 {
-                    return Negotiate.WithModel(new Error("Not logged in.")).
-                        WithStatusCode(HttpStatusCode.Forbidden);
+                    return AccesDenied();
                 }
             };
             Post["/current", true] = Update;
@@ -60,8 +59,7 @@ namespace Cuttler.Api.Modules
             }
             else
             {
-                return Negotiate.WithModel(new Error("Not logged in.")).
-                        WithStatusCode(HttpStatusCode.Forbidden);
+                return AccesDenied();
             }
         }
     
