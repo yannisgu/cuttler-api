@@ -1,0 +1,14 @@
+﻿[
+    {
+        "Id": "{B975519F-37BC-4E79-8D6B-B31701B754F1}",
+        "UserName": "yannisgu",
+        "Email": "yannis@yannis.com",
+        "Street": "Street 34",
+        "Zip": "8945",
+        "Location": "Dummy",
+        "Country": "Switzerland",
+        "Logins": [
+            {"PasswordHash": "mockedTrueHash"}
+        ]
+    }
+]

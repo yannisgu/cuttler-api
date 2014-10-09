@@ -70,11 +70,13 @@ namespace Cuttler.Api.Tests.Modules
             });
             var browser = new Browser(bootstraper);
 
+            var email = "yannis@yannis.org";
+            
             //when 
             var newUser = new UserViewModel()
             {
                 UserName = "yannisgu",
-                Email = "yannis@yannis.org",
+                Email = email,
                 Country = "Switzerland",
                 Location = "Courtaman",
                 Password = "Pass@word1",
@@ -91,19 +93,19 @@ namespace Cuttler.Api.Tests.Modules
             //Should
             mock.Verify(svc => svc.AddUser(It.Is<User>(_ =>
                 _.UserName == newUser.UserName &&
-                _.Email == newUser.Email &&
                 _.Country == newUser.Country &&
                 _.Location == newUser.Location &&
                 _.Street == newUser.Street &&
                 _.Zip == newUser.Zip
                 )));
 
+            mock.Verify(_ => _.AddEmail(It.Is<User>(u => u.UserName == newUser.UserName), email));
+
             mock.Verify(svc => svc.AddLogin(It.Is<User>(_ => 
                 _.UserName == newUser.UserName), newUser.Password, false));
 
             var user = result.Get<User>();
             Assert.AreEqual(user.UserName, newUser.UserName);
-            Assert.AreEqual(user.Email, newUser.Email);
             Assert.AreEqual(user.Country, newUser.Country);
             Assert.AreEqual(user.Location, newUser.Location);
             Assert.AreEqual(user.Street, newUser.Street);

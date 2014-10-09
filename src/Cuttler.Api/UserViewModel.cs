@@ -6,6 +6,8 @@ namespace Cuttler.Entities
 {
     public class UserViewModel : User
     {
+        public string Email { get; set; }
+
         public string Password { get; set; }
 
         [JsonIgnore]

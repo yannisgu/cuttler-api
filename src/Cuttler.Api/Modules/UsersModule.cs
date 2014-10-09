@@ -43,6 +43,7 @@ namespace Cuttler.Api.Modules
         {
             var newUser = this.Bind<UserViewModel>();
             await userService.AddUser(newUser);
+            await userService.AddEmail(newUser, newUser.Email);
             await userService.AddLogin(newUser, newUser.Password, enabled: false);
             return newUser;
         }

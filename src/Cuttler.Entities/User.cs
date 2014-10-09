@@ -12,7 +12,6 @@ namespace Cuttler.Entities
                
         public virtual string UserName { get; set; }
                
-        public virtual string Email { get; set; }
         public virtual string Street { get; set; }
         public virtual string Zip { get; set; }
         public virtual string Location { get; set; }
@@ -20,5 +19,6 @@ namespace Cuttler.Entities
         public virtual string Country { get; set; }
 
         public virtual IEnumerable<Login> Logins { get; set; }
+        public virtual IEnumerable<string> Emails { get; set; }
     }
 }
