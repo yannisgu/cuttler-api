@@ -11,7 +11,7 @@ using Nancy.Security;
 
 namespace Cuttler.Api.Modules
 {
-    public abstract class TenantsModule<T> :BaseModule where T : Tenant
+    public abstract class TenantsModule<T> :BaseModule where T : Tenant<T>
     {
         protected abstract ITenantService<T> TenantService { get; }
 

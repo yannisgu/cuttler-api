@@ -7,7 +7,7 @@ using Cuttler.Entities;
 
 namespace Cuttler.DataAccess
 {
-    public interface ITenantService<T> where T : Tenant
+    public interface ITenantService<T> where T : Tenant<T>
     {
         Task Add(T viewModel);
         Task Update(Guid id);
