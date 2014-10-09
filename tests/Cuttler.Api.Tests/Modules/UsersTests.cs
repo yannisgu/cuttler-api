@@ -18,10 +18,8 @@ using Browser = Nancy.Testing.Browser;
 namespace Cuttler.Api.Tests.Modules
 {
     [TestFixture]
-    class UsersTests
+    class UsersTests : BaseModuleTests
     {
-        private static Guid testUserGuid = new Guid("{DD0BAA48-9D5F-4167-8672-632D4EE1D27F}");
-
         [Test]
         public void Should_return_the_user_when_login_with_credentials()
         {
@@ -166,6 +164,7 @@ namespace Cuttler.Api.Tests.Modules
         public void Should_return_current_user_when_loggedin()
         {
             var mock = GetUserServiceLoginMock();
+
             var bootstraper = new TestBootstrapper(cfg =>
             {
                 cfg.Module<UsersModule>();
@@ -187,30 +186,7 @@ namespace Cuttler.Api.Tests.Modules
             Assert.AreEqual(user.UserName, "user");
         }
 
-        private BrowserResponse Login(Browser browser, string userName = "user", string password = "pass")
-        {
-            return browser.Post("/users/login", with =>
-            {
-                with.HttpRequest();
-                with.Accept(new MediaRange("application/json"));
-                with.FormValue("username", userName);
-                with.FormValue("password", password);
-            });
-        }
-
-        private static Mock<IUserService> GetUserServiceLoginMock()
-        {
-            var testUser = new User() { UserName = "user", Id = testUserGuid };
-
-            var mock = new Mock<IUserService>();
-            mock.Setup(svc => svc.Login(It.IsAny<string>(), It.IsAny<string>())).
-                ReturnsAsync(default(User));
-            mock.Setup(svc => svc.Login("user", "pass"))
-                .ReturnsAsync(testUser);
-
-            mock.Setup(svc => svc.GetUser("user")).
-                ReturnsAsync(testUser);
-            return mock;
-        }
     }
+
+    
 }

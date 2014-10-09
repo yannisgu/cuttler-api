@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Cuttler.Entities;
@@ -14,5 +16,6 @@ namespace Cuttler.DataAccess
         Task<Stream> GetBackupStream(Guid backupId);
         Task<Backup> GetBackups(Guid guid);
         Task<bool> MatchTenantBackup(Guid tenantId, Guid backupId);
+        Task<IEnumerable<T>> Get(Guid id);
     }
 }

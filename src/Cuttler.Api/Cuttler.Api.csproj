@@ -75,6 +75,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="IndexModule.cs" />
     <Compile Include="Modules\BaseModule.cs" />
+    <Compile Include="Modules\OctopusModule.cs" />
     <Compile Include="Modules\TenantsModule.cs" />
     <Compile Include="Modules\UsersModule.cs" />
     <Compile Include="NancyUser.cs" />

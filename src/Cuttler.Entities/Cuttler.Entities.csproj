@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Backup.cs" />
     <Compile Include="Login.cs" />
+    <Compile Include="OctopusTenant.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tenant.cs" />
     <Compile Include="User.cs" />

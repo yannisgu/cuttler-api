@@ -7,6 +7,7 @@ using Cuttler.Entities;
 using Nancy;
 using Nancy.ModelBinding;
 using Nancy.Responses.Negotiation;
+using Nancy.Security;
 
 namespace Cuttler.Api.Modules
 {
@@ -16,6 +17,10 @@ namespace Cuttler.Api.Modules
 
         protected TenantsModule(string type) :base("/tenants/" + type)
         {
+            this.RequiresAuthentication();
+
+            Get["/", true] = async (_, cancel) => await TenantService.Get(User.Id);
+
             Post["/", true] = async (_, cancel) =>
             {
                 var viewModel = this.Bind<T>();
@@ -63,7 +68,7 @@ namespace Cuttler.Api.Modules
             {
                 var tenantId = new Guid(_.id);
                 var backupId = new Guid(_.backupId);
-                if (!await TenantService.IsAdmin(tenantId, User.Id) || await TenantService.MatchTenantBackup(tenantId, backupId))
+                if (!await TenantService.IsAdmin(tenantId, User.Id) || !await TenantService.MatchTenantBackup(tenantId, backupId))
                 {
                     return AccesDenied();
                 }
