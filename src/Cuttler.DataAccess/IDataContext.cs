@@ -11,6 +11,8 @@ namespace Cuttler.DataAccess
 {
     public interface IDataContext
     {
-        DbSet<User> Users { get; set; } 
+        DbSet<User> Users { get; set; }
+        DbSet<Email> Emails { get; set; }
+        DbSet<Login> Logins { get; set; } 
     }
 }

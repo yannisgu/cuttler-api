@@ -58,7 +58,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Modules\BaseModuleTests.cs" />
     <Compile Include="Modules\OctopusTests.cs" />
     <Compile Include="TestBootstrapper.cs" />

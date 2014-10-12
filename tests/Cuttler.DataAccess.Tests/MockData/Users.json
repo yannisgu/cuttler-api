@@ -8,7 +8,7 @@
         "Location": "Dummy",
         "Country": "Switzerland",
         "Logins": [
-            {"PasswordHash": "mockedTrueHash"}
+            {"PasswordHash": "mockedTrueHash", "Enabled":true}
         ]
     }
 ]

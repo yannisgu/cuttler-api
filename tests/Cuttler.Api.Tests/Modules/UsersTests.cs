@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CsQuery.Utility;
 using Cuttler.Api.Modules;
+using Cuttler.Api.ViewModels;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Moq;

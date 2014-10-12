@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Cuttler.Api.ViewModels;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Nancy;
@@ -42,15 +43,16 @@ namespace Cuttler.Api.Modules
         private async Task<object> Register(dynamic parameters, CancellationToken cancel)
         {
             var newUser = this.Bind<UserViewModel>();
-            await userService.AddUser(newUser);
-            await userService.AddEmail(newUser, newUser.Email);
-            await userService.AddLogin(newUser, newUser.Password, enabled: false);
+            var userObject = newUser.AsUser();
+            await userService.AddUser(userObject);
+            await userService.AddEmail(userObject, newUser.Email);
+            await userService.AddLogin(userObject, newUser.Password, enabled: false);
             return newUser;
         }
 
         private async Task<object> Update(dynamic paramters, CancellationToken canel)
         {
-            var newUser = this.Bind<UserViewModel>();
+            var newUser = this.Bind<UserViewModel>().AsUser();
             var user = Context.CurrentUser as NancyUser;
             if (user != null)
             {

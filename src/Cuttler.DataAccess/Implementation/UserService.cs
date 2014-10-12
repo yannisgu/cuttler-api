@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Cuttler.Entities;
@@ -22,7 +24,7 @@ namespace Cuttler.DataAccess.Implementation
         public async Task<User> Login(string username, string password)
         {
             var user = await dataContext.Users.Where(u => u.UserName == username).Include(u => u.Logins).FirstOrDefaultAsync();
-            if (user.Logins.Any(l => passwordService.ValidatePassword(password, l.PasswordHash)))
+            if (user.Logins.Any(l => l.Enabled && passwordService.ValidatePassword(password, l.PasswordHash)))
             {
                 return user;
             }
@@ -69,12 +71,42 @@ namespace Cuttler.DataAccess.Implementation
         {
             Email mail = new Email()
             {
-                Guid = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Mail = email,
                 UserId = user.Id,
+                Verified = false,
+                VerifyCode = GetNewVerifyCode()
             };
             dataContext.Emails.Add(mail);
             await dataContext.SaveChangesAsync();
+        }
+
+        private string GetNewVerifyCode()
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                // ANSI (varchar)
+                var valueBytes = Encoding.Default.GetBytes(Guid.NewGuid().ToString());
+                var md5HashBytes = md5.ComputeHash(valueBytes);
+                var builder = new StringBuilder(md5HashBytes.Length * 2);
+                foreach (var md5Byte in md5HashBytes)
+                    builder.Append(md5Byte.ToString("X2"));
+                return builder.ToString();
+            }
+        }
+
+        public async Task VerifyEmail(string verifyCode)
+        {
+            var email = await dataContext.Emails
+                .Where(_ => !_.Verified && _.VerifyCode == verifyCode)
+                .FirstOrDefaultAsync();
+            if (email != null)
+            {
+                email.Verified = true;
+                var logins = dataContext.Logins.Where(_ => _.UserId == email.UserId && !_.Enabled);
+                logins.ToList().ForEach(_ => _.Enabled = true);
+                dataContext.SaveChanges();
+            }
         }
     }
 }

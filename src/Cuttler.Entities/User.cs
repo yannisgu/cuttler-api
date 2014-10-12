@@ -18,7 +18,7 @@ namespace Cuttler.Entities
                
         public virtual string Country { get; set; }
 
-        public virtual IEnumerable<Login> Logins { get; set; }
-        public virtual IEnumerable<string> Emails { get; set; }
+        public virtual List<Login> Logins { get; set; }
+        public virtual ICollection<string> Emails { get; set; }
     }
 }
