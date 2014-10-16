@@ -11,6 +11,8 @@ namespace Cuttler.DataAccess
         Task AddLogin(User user, string password, bool enabled = true);
         Task UpdateUser(User newUser);
         Task AddEmail(User user, string email);
-        Task VerifyEmail(string verifyCode);
+        Task<User> VerifyEmail(string verifyCode);
+
+        Task<User> GetUser(System.Guid guid);
     }
 }

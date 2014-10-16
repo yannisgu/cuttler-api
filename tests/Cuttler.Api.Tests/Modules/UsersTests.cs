@@ -8,6 +8,7 @@ using Cuttler.Api.Modules;
 using Cuttler.Api.ViewModels;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
+using Cuttler.TestFramework;
 using Moq;
 using Nancy;
 using Nancy.Responses.Negotiation;
@@ -74,7 +75,7 @@ namespace Cuttler.Api.Tests.Modules
             var email = "yannis@yannis.org";
             
             //when 
-            var newUser = new UserViewModel()
+            var newUser = new NewUserViewModel()
             {
                 UserName = "yannisgu",
                 Email = email,

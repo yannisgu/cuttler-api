@@ -62,8 +62,7 @@ namespace Cuttler.DataAccess.Implementation
 
         public async Task UpdateUser(User user)
         {
-            user.Logins = null;
-            dataContext.Users.Attach(user);
+            dataContext.Entry(user).State = EntityState.Modified;
             await dataContext.SaveChangesAsync();
         }
 
@@ -95,7 +94,7 @@ namespace Cuttler.DataAccess.Implementation
             }
         }
 
-        public async Task VerifyEmail(string verifyCode)
+        public async Task<User> VerifyEmail(string verifyCode)
         {
             var email = await dataContext.Emails
                 .Where(_ => !_.Verified && _.VerifyCode == verifyCode)
@@ -106,7 +105,14 @@ namespace Cuttler.DataAccess.Implementation
                 var logins = dataContext.Logins.Where(_ => _.UserId == email.UserId && !_.Enabled);
                 logins.ToList().ForEach(_ => _.Enabled = true);
                 dataContext.SaveChanges();
+                return await dataContext.Users.FindAsync(email.UserId);
             }
+            return null;
+        }
+
+        public async Task<User> GetUser(Guid guid)
+        {
+            return await dataContext.Users.FindAsync(guid);
         }
     }
 }

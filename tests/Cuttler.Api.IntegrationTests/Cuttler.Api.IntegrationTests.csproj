@@ -79,6 +79,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Cuttler.TestFramework\Cuttler.TestFramework.csproj">
+      <Project>{391facb6-bc5f-4678-890a-d6386efaaeae}</Project>
+      <Name>Cuttler.TestFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Cuttler.Api\Cuttler.Api.csproj">
       <Project>{ed638dd5-e755-4b7a-940d-5c94ab425686}</Project>
       <Name>Cuttler.Api</Name>

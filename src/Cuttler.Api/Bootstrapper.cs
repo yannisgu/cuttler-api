@@ -29,13 +29,13 @@ namespace Cuttler.Api
             container.Load(new INinjectModule[] { new NinjectModule() });
             pipelines.WithSessionAuthentification(container.Get<IUserService>());
             CookieBasedSessions.Enable(pipelines);
-            pipelines.OnError.AddItemToEndOfPipeline((_, err) =>
+            pipelines.OnError.AddItemToStartOfPipeline((_, err) =>
             {
-               
+
                 return new NegotiatedResponse(new Error(err.Message))
                 {
                     StatusCode = HttpStatusCode.InternalServerError
-                };  
+                };
             });
         
         }

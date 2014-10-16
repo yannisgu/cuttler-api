@@ -29,7 +29,7 @@ namespace Cuttler.Api.Modules
                 var user = Context.CurrentUser as NancyUser;
                 if (user != null)
                 {
-                    return user.User;
+                    return new UserViewModel(user.User);
                 }
                 else
                 {
@@ -37,12 +37,13 @@ namespace Cuttler.Api.Modules
                 }
             };
             Post["/current", true] = Update;
-
+            Post["/verifyEmail/{mail}", true] = async (_, cancel) => 
+                await userService.VerifyEmail(_.mail);
         }
 
         private async Task<object> Register(dynamic parameters, CancellationToken cancel)
         {
-            var newUser = this.Bind<UserViewModel>();
+            var newUser = this.Bind<NewUserViewModel>();
             var userObject = newUser.AsUser();
             await userService.AddUser(userObject);
             await userService.AddEmail(userObject, newUser.Email);
@@ -58,18 +59,15 @@ namespace Cuttler.Api.Modules
             {
                 newUser.Id = user.User.Id;
                 await userService.UpdateUser(newUser);
-                return newUser;
+                return new UserViewModel(newUser);
             }
-            else
-            {
-                return AccesDenied();
-            }
+            return AccesDenied();
         }
     
         private async Task<dynamic> Login(dynamic paramters, CancellationToken cancel)
         {
-            User user;
-            object returnObject = user= await userService.Login(Context.Request.Form["username"], Context.Request.Form["password"]);
+            User user= await userService.Login(Context.Request.Form["username"], Context.Request.Form["password"]);
+            object returnObject = user != null ? new UserViewModel(user) : null;
             var statusCode = HttpStatusCode.OK;
             if (returnObject == null)
             {
