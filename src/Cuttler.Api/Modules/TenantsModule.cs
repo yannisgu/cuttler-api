@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Cuttler.Api.ViewModels;
 using Cuttler.DataAccess;
 using Cuttler.Entities;
 using Nancy;
@@ -11,40 +12,45 @@ using Nancy.Security;
 
 namespace Cuttler.Api.Modules
 {
-    public abstract class TenantsModule<T> :BaseModule where T : Tenant<T>
+    public abstract class TenantsModule<TTeanant, TViewModel> :BaseModule where TTeanant : Tenant<TTeanant> where TViewModel : TenantViewModel<TTeanant>
     {
-        protected abstract ITenantService<T> TenantService { get; }
+        protected abstract ITenantService<TTeanant> TenantService { get; }
 
         protected TenantsModule(string type) :base("/tenants/" + type)
         {
             this.RequiresAuthentication();
 
-            Get["/", true] = async (_, cancel) => await TenantService.Get(User.Id);
+            Get["/", true] = async (_, cancel) =>
+                (await TenantService.GetByUser(User.Id)).Select(GetViewModel);
 
             Post["/", true] = async (_, cancel) =>
             {
-                var viewModel = this.Bind<T>();
-                await TenantService.Add(viewModel);
-                return viewModel;
+                var viewModel = this.Bind<TViewModel>();
+                var model = viewModel.AsTenant();
+                await TenantService.Add(model);
+                await TenantService.AddAdmin(model, this.User.Id);
+                return GetViewModel(model);
             };
 
             Post["/{id}", true] = async (_, cancel) =>
             {
                 var guid = new Guid(_.id);
-                if (! await TenantService.IsAdmin(guid, User.Id))
+                var tenant = await TenantService.Get(guid);
+                if (!(tenant.Admins.Any(u => u.Id  == User.Id)))
                 {
                     return AccesDenied();
                 }
-                var viewModel = this.Bind<T>();
-                viewModel.Id = guid;
-                await TenantService.Update(viewModel.Id);
-                return viewModel;
+                var viewModel = this.Bind<TViewModel>();
+                viewModel.UpdateTenant(tenant);
+                await TenantService.Update(guid, tenant);
+                return GetViewModel(tenant);
             };
 
             Delete["/{id}", true] = async (_, cancel) =>
             {
                 var guid = new Guid(_.id);
-                if (!await TenantService.IsAdmin(guid, User.Id))
+                var tenant = await TenantService.Get(guid);
+                if (!(TenantService.IsAdmin(tenant, User.Id)))
                 {
                     return AccesDenied();
                 }
@@ -55,8 +61,8 @@ namespace Cuttler.Api.Modules
             Get["/{id}/backups", true] = async (_, cancel) =>
             {
                 var guid = new Guid(_.id);
-
-                if (!await TenantService.IsAdmin(guid, User.Id))
+                var tenant = await TenantService.Get(guid);
+                if (!TenantService.IsAdmin(tenant, User.Id))
                 {
                     return AccesDenied();
                 }
@@ -68,7 +74,9 @@ namespace Cuttler.Api.Modules
             {
                 var tenantId = new Guid(_.id);
                 var backupId = new Guid(_.backupId);
-                if (!await TenantService.IsAdmin(tenantId, User.Id) || !await TenantService.MatchTenantBackup(tenantId, backupId))
+                var backup = await TenantService.GetBackup(backupId);
+                var tenant = await TenantService.Get(tenantId);
+                if (! TenantService.IsAdmin(tenant, User.Id) || backup.TenantId != tenantId)
                 {
                     return AccesDenied();
                 }
@@ -81,5 +89,7 @@ namespace Cuttler.Api.Modules
                 }, "application/zip");
             };
         }
+
+        protected abstract TViewModel GetViewModel(TTeanant model);
     }
 }

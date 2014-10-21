@@ -52,16 +52,25 @@
   <ItemGroup>
     <Compile Include="Encryption.cs" />
     <Compile Include="IDataContext.cs" />
+    <Compile Include="IFileService.cs" />
     <Compile Include="Implementation\DataContext.cs" />
     <Compile Include="Implementation\DbConfiguration.cs" />
+    <Compile Include="Implementation\FileService.cs" />
+    <Compile Include="Implementation\Message.cs" />
+    <Compile Include="Implementation\IMessageService.cs" />
     <Compile Include="Implementation\OctopusTenantService.cs" />
     <Compile Include="Implementation\TenantService.cs" />
     <Compile Include="Implementation\UserService.cs" />
     <Compile Include="ITenantService.cs" />
     <Compile Include="IUserService.cs" />
+    <Compile Include="MessageService.cs" />
     <Compile Include="Migrations\201410122009121_First.cs" />
     <Compile Include="Migrations\201410122009121_First.Designer.cs">
       <DependentUpon>201410122009121_First.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201410162045562_First1.cs" />
+    <Compile Include="Migrations\201410162045562_First1.Designer.cs">
+      <DependentUpon>201410162045562_First1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="NinjectModule.cs" />
@@ -80,6 +89,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201410122009121_First.resx">
       <DependentUpon>201410122009121_First.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201410162045562_First1.resx">
+      <DependentUpon>201410162045562_First1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

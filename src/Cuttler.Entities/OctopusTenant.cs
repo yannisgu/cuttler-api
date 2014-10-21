@@ -8,6 +8,11 @@ namespace Cuttler.Entities
 {
     public class OctopusTenant : Tenant<OctopusTenant>
     {
-        public IEnumerable<string> Urls { get; set; } 
+        public IEnumerable<string> Urls { get; set; }
+
+        public override string Type
+        {
+            get { return "Octopus"; }
+        }
     }
 }

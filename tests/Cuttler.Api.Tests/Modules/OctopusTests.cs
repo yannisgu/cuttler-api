@@ -38,7 +38,7 @@ namespace Cuttler.Api.Tests.Modules
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            tenantMock.Verify(svc => svc.Get(testUser.Id));
+            tenantMock.Verify(svc => svc.GetByUser(testUser.Id));
         }
 
 
@@ -46,10 +46,9 @@ namespace Cuttler.Api.Tests.Modules
         public void Should_filter_for_backup_and_tenant()
         {
             var tenantMock = new Mock<ITenantService<OctopusTenant>>();
-            tenantMock.Setup(_ => _.MatchTenantBackup(It.IsAny<Guid>(), It.IsAny<Guid>()))
-                .ReturnsAsync(false);
-            tenantMock.Setup(_ => _.MatchTenantBackup(new Guid(TEST_TENANT_ID), new Guid(TEST_BACKUP_ID)))
-              .ReturnsAsync(true);
+
+            tenantMock.Setup(_ => _.GetBackup(new Guid(TEST_BACKUP_ID))).ReturnsAsync(new Backup() { TenantId = new Guid(TEST_TENANT_ID) });
+            
             tenantMock.Setup(svc => svc.GetBackupStream(new Guid(TEST_BACKUP_ID))).ReturnsAsync(new MemoryStream());
             var browser = GetLoggedInBrowser(tenantMock);
             
@@ -67,15 +66,12 @@ namespace Cuttler.Api.Tests.Modules
         public void Should_forbidd_when_get_not_matching_backup_tenant()
         {
             var tenantMock = new Mock<ITenantService<OctopusTenant>>();
-            tenantMock.Setup(_ => _.MatchTenantBackup(new Guid(TEST_TENANT_ID), new Guid(TEST_BACKUP_ID)))
-                .ReturnsAsync(true);
-            tenantMock.Setup(_ => _.MatchTenantBackup(It.IsAny<Guid>(), It.IsAny<Guid>()))
-                .ReturnsAsync(false);
-           
+            Guid backupGuid = Guid.NewGuid();
+            tenantMock.Setup(_ => _.GetBackup(backupGuid)).ReturnsAsync(new Backup() { TenantId = Guid.NewGuid() });
             var browser = GetLoggedInBrowser(tenantMock);
 
 
-            var response = browser.Get("/tenants/octopus/" + TEST_TENANT_ID + "/backups/" + new Guid(), With());
+            var response = browser.Get("/tenants/octopus/" + TEST_TENANT_ID + "/backups/" + backupGuid, With());
 
             Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -96,7 +92,8 @@ namespace Cuttler.Api.Tests.Modules
 
         private Browser GetLoggedInBrowser(Mock<ITenantService<OctopusTenant>> tenantMock)
         {
-            tenantMock.Setup(_ => _.IsAdmin(TestTenantGuid, TestIserGuid)).ReturnsAsync(true);
+            tenantMock.Setup(_ => _.Get(TestTenantGuid)).ReturnsAsync(new OctopusTenant() { Id = TestTenantGuid });
+            tenantMock.Setup(_ => _.IsAdmin(It.Is<Tenant<OctopusTenant>>(t => t.Id == TestTenantGuid), TestIserGuid)).Returns(true);
             var browser = GetBrowser(tenantMock);
             Login(browser);
             return browser;
@@ -105,7 +102,7 @@ namespace Cuttler.Api.Tests.Modules
         private Browser GetBrowser(Mock<ITenantService<OctopusTenant>> tenantMock)
         {
             var userService = GetUserServiceLoginMock();
-            tenantMock.Setup(svc => svc.Get(It.IsAny<Guid>())).ReturnsAsync(new List<OctopusTenant>());
+            tenantMock.Setup(svc => svc.GetByUser(It.IsAny<Guid>())).ReturnsAsync(new List<OctopusTenant>());
             var bootstraper = new TestBootstrapper(cfg =>
             {
                 cfg.Module<UsersModule>();

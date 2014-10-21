@@ -80,6 +80,8 @@
     <Compile Include="Modules\UsersModule.cs" />
     <Compile Include="NancyUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\OctopusTenantViewModel.cs" />
+    <Compile Include="ViewModels\TenantViewModel.cs" />
     <Compile Include="ViewModels\UserViewModel.cs" />
   </ItemGroup>
   <ItemGroup>

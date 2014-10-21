@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Cuttler.Entities
 {
@@ -13,5 +14,12 @@ namespace Cuttler.Entities
         public virtual Guid SubscriptionId { get; set; }
 
         public virtual Subscription<T> Subscription { get; set; }
+
+        public abstract string Type { get; }
+
+        public virtual List<Backup> Backups { get; set; }
+        public virtual bool Enabled { get; set; }
+        
+        public virtual List<User> Admins { get; set; }
     }
 }

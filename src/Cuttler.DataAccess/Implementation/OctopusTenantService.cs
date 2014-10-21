@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,44 +11,59 @@ namespace Cuttler.DataAccess.Implementation
 {
     public class OctopusTenantService : TenantService<OctopusTenant>
     {
-        public override Task Add(OctopusTenant viewModel)
+        private readonly DataContext dataContext;
+        private readonly IFileService fileService;
+
+        public OctopusTenantService(DataContext dataContext, IMessageService messageService, IFileService fileService) : base(dataContext, messageService)
         {
-            throw new NotImplementedException();
+            this.dataContext = dataContext;
+            this.fileService = fileService;
         }
 
-        public override Task Update(Guid id)
+        protected async override  Task Update(OctopusTenant tenant)
         {
-            throw new NotImplementedException();
+            dataContext.Entry(tenant).State = EntityState.Modified;
+            await dataContext.SaveChangesAsync();
         }
 
-        public override Task<bool> IsAdmin(Guid tenant, Guid user)
+        protected async override Task AddPersistent(OctopusTenant tenant)
         {
-            throw new NotImplementedException();
+            dataContext.OctopusTenants.Add(tenant);
+            await dataContext.SaveChangesAsync();
         }
 
-        public override Task Delete(Guid guid)
+
+        public async override Task<bool> IsAdmin(Guid tenant, Guid user)
         {
-            throw new NotImplementedException();
+            return (await dataContext.OctopusTenants.FindAsync(tenant)).
+                Admins.Any(_ => _.Id == user);
         }
 
-        public override Task<Stream> GetBackupStream(Guid backupId)
+        public override async Task DeletePersistent(OctopusTenant tenant)
         {
-            throw new NotImplementedException();
+            tenant.Enabled = false;
+            await dataContext.SaveChangesAsync();
         }
 
-        public override Task<Backup> GetBackups(Guid guid)
+        public override Task<Stream> GetBackupStream(Backup backup)
         {
-            throw new NotImplementedException();
+            return fileService.GetStreamAsync(backup.FilePath);
         }
 
-        public override Task<bool> MatchTenantBackup(Guid tenantId, Guid backupId)
+        public override async Task<IEnumerable<Backup>> GetBackups(Guid guid)
         {
-            throw new NotImplementedException();
+            return await dataContext.Backups.Where(_ => _.TenantId == guid).ToListAsync();
         }
 
-        public override Task<IEnumerable<OctopusTenant>> Get(Guid id)
+        public async override Task<OctopusTenant> Get(Guid id)
         {
-            throw new NotImplementedException();
+            return await dataContext.OctopusTenants.FindAsync(id);
+        }
+
+        public async override Task<IEnumerable<OctopusTenant>> GetByUser(Guid userId)
+        {
+            return await dataContext.OctopusTenants.
+                Where(_ => _.Admins.Any(a => a.Id == userId)).ToListAsync();
         }
     }
 }

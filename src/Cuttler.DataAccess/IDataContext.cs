@@ -13,6 +13,7 @@ namespace Cuttler.DataAccess
     {
         DbSet<User> Users { get; set; }
         DbSet<Email> Emails { get; set; }
-        DbSet<Login> Logins { get; set; } 
+        DbSet<Login> Logins { get; set; }
+        DbSet<OctopusTenant> OctopusTenants { get; set; }
     }
 }

@@ -20,5 +20,7 @@ namespace Cuttler.Entities
 
         public virtual List<Login> Logins { get; set; }
         public virtual ICollection<string> Emails { get; set; }
+
+        public virtual List<OctopusTenant> OctopusTenants { get; set; } 
     }
 }

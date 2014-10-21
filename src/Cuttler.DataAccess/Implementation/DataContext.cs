@@ -25,6 +25,8 @@ namespace Cuttler.DataAccess.Implementation
         public virtual DbSet<User> Users { get; set; }
 
         public virtual DbSet<Login> Logins { get; set; }
+        public virtual DbSet<OctopusTenant> OctopusTenants { get; set; }
         public virtual  DbSet<Email> Emails { get; set; }
+        public virtual DbSet<Backup> Backups { get; set; }
     }
 }

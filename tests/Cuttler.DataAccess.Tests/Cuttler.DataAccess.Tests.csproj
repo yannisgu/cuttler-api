@@ -61,6 +61,7 @@
     <Compile Include="Mocks\BaseDbSetMock.cs" />
     <Compile Include="Mocks\UsersDbSetMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\OctopusTenantTests.cs" />
     <Compile Include="Services\UserSericeTests.cs" />
     <Compile Include="TestDbAsyncProvider.cs" />
   </ItemGroup>
